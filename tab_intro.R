@@ -8,8 +8,10 @@ tab_intro <- tabItem(
   span(" | "),
   tags$a(href="https://github.com/cozmo4hri/interactive-tool", "Code for this app"),
   span(" | "),
-  tags$a(href="https://github.com/cozmo4hri/interactive-tool", "Download data"),
+  tags$a(href="https://github.com/cozmo4hri/interactive-tool/blob/master/fullset_shiny.csv", "Download data"),
   tags$br(),
   tags$br(),
-  p("To be added: explanation of the three taps")
+  img(src='cozmo.png'),
+  p("To be added: explanation of the three taps. More on shiny")
 )
+
