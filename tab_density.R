@@ -7,7 +7,7 @@ tab_density <- tabItem(
     box(
       title = "Density",
       #width = NULL,
-      plotlyOutput(outputId = "densPlot", height = "auto")
+      plotOutput(outputId = "densPlot")
     )
   )
 )

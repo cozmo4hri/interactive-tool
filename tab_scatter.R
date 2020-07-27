@@ -6,13 +6,18 @@ tab_scatter <- tabItem(
     box(
       title = "Animation group",
       #width = NULL,
-      plotlyOutput(outputId = "scatterPlot", height = "auto")
+      plotOutput(outputId = "scatterPlot", click = "plot_click")
     ),
     box(
-      title = "Animation group",
-      tags$video(id="video2", type = "video/mp4",src = "1.mp4", width = "320px", height = "180px", controls = "controls")
+      title = "Animation video",
+      tags$video(id="video2", type = "video/mp4",src = paste0(video_id, ".mp4"), width = "320px", height = "180px", controls = "controls")
+    ),
+    column(width = 12,
+           box(
+             title = "Animation details",
+             verbatimTextOutput("info"),
+             width = 12
+           )
     )
   )
 )
-
-#1280 × 720

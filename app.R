@@ -24,13 +24,12 @@
 # load the dependencies
 library(shiny)
 library(shinydashboard) 
-library(plotly) #this is a problem
 library(tidyverse)
 library(DT)
 
 source("tab_intro.R")
-source("tab_density.R")
 source("tab_scatter.R")
+source("tab_density.R")
 source("tab_table.R")
 DF.main <- read_csv("fullset_shiny.csv") 
 
@@ -41,8 +40,8 @@ ui <- dashboardPage(
     width = 350,
     sidebarMenu(
       menuItem("Introduction", tabName = "tab_intro"),
-      menuItem("Density plot", tabName = "tab_density"),
       menuItem("Scatter plot", tabName = "tab_scatter"),
+      menuItem("Density plot", tabName = "tab_density"),
       menuItem("Table", tabName = "tab_table"),
       
       # main input ----
@@ -121,6 +120,8 @@ ui <- dashboardPage(
 ## server ----
 server <- function(input, output) {
   
+  activeVideo <- reactiveVal()
+  
   # filter and group - density ----
   DF.de <- reactive({
     DF.main %>% 
@@ -135,6 +136,7 @@ server <- function(input, output) {
                between(interaction_score, input$filter_interaction[1], input$filter_interaction[2]))%>%
       filter(if(length(input$behaviour>0)) group %in% input$behaviour else TRUE)
   })
+  
   # filter and group - scatter ----
   
   DF.sc <- reactive({
@@ -151,10 +153,8 @@ server <- function(input, output) {
       filter(if(length(input$behaviour>0)) group %in% input$behaviour else TRUE)
   })
   
-  
-  
-  #plot for density
-  output$densPlot <- renderPlotly({
+  #plot for density ----
+  output$densPlot <- renderPlot({
     DF.de() %>% 
       ggplot(aes(x=valence,
                  y=arousal, 
@@ -177,8 +177,8 @@ server <- function(input, output) {
       theme(legend.position="none") 
   })
   
-  #plot for scatter
-  output$scatterPlot <- renderPlotly({
+  #plot for scatter ----
+  output$scatterPlot <- renderPlot({
     DF.sc() %>% 
       ggplot(aes(x=valence,
                  y=arousal,
@@ -186,8 +186,6 @@ server <- function(input, output) {
                  colour=group,
                  label = animation_name))+
       geom_point()+
-      #geom_point(aes(size = valence_sd), alpha = 0.5) + 
-      #geom_point(aes(size = arousal_sd), alpha = 0.5) + 
       xlim(-1,1) + 
       ylim(-1,1) + 
       theme_linedraw() + 
@@ -198,10 +196,40 @@ server <- function(input, output) {
       geom_vline(xintercept = 0,color = "grey", size=1, alpha = 0.5) 
   })
   
-  #table
-  #Creating table -------
+  #get video_id ----
+  observeEvent(input$plot_click,
+               {
+                 activeVideo <- DF.sc() %>%
+                   nearPoints(input$plot_click, maxpoints = 1) %>%
+                   mutate(video_id = as.character(video_id)) %>% 
+                   pull(video_id)
+                 
+                 write.csv(activeVideo, "active.csv")
+                 myfile <- fs::file_temp(activeVideo, ext = ".mp4")
+                 
+               })
+  
+  
+  #DF.de <- reactive({
+  # activeVideo <- DF.sc %>%
+  #    filter(video_id == "42") %>% 
+  #    mutate(video_id = as.character(video_id)) %>% 
+  #    pull(video_id)
+  # })
+  
+  #get info for video ----
+  output$info <- renderPrint({
+    DF.sc() %>% 
+      select(-interaction_score) %>% 
+      nearPoints(input$plot_click, maxpoints = 1)
+  })
+  output$clickVideo <- renderPrint(({
+    activeVideo()
+  }))
+  #table ----
   output$tableDF <- DT::renderDataTable({
-    DF.sc()
+    DF.sc() %>% 
+      select(-interaction_score)
   }) 
 }
 
