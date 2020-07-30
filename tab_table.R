@@ -9,4 +9,3 @@ tab_table <- tabItem(
     )
   )
 )
-#tabPanel("Table", tableOutput("table"))

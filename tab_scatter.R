@@ -8,9 +8,14 @@ tab_scatter <- tabItem(
       #width = NULL,
       plotOutput(outputId = "scatterPlot", click = "plot_click")
     ),
+    #box(
+    #  title = "Animation video",
+    #  verbatimTextOutput("info2")
+    #),
     box(
       title = "Animation video",
-      tags$video(id="video2", type = "video/mp4",src = paste0(video_id, ".mp4"), width = "320px", height = "180px", controls = "controls")
+      #htmlOutput(avideo)
+      tags$video(id="video2", type = "video/mp4",src = paste0("42.mp4"), width = "320px", height = "180px", controls = "controls")
     ),
     column(width = 12,
            box(
