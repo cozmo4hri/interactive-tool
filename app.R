@@ -15,7 +15,7 @@
 # Ruud's wishlist:
 # - Display the animation categories in two columns
 
-# load the dependencies
+# load the dependencies  
 library(shiny)
 library(shinydashboard) 
 library(tidyverse)
@@ -34,7 +34,7 @@ DF.main <- read_csv("fullset_shiny.csv")
 ui <- dashboardPage(
   dashboardHeader(title = "cozmo4hri: interactive tool for emotion classification"),
   dashboardSidebar(
-    width = 350,
+    width = 250,
     sidebarMenu(
       menuItem("Introduction", tabName = "tab_intro"),
       menuItem("Scatter plot", tabName = "tab_scatter"),
@@ -136,7 +136,7 @@ server <- function(input, output) {
        summarise(valence = mean(valence),
                  arousal = mean(arousal),
                  confidence = mean(confidence),
-                 interaction_score = mean(interaction_score)) 
+                 interaction_score = mean(interaction_score))
      DF.tmp2 <- DF.tmp2 %>% filter(between(valence, input$filter_valence[1], input$filter_valence[2])) 
      DF.tmp2 <- DF.tmp2 %>% filter(between(arousal, input$filter_arousal[1], input$filter_arousal[2])) 
      DF.tmp2 <- DF.tmp2 %>% filter(between(confidence, input$filter_confidence[1], input$filter_confidence[2])) 
@@ -185,13 +185,14 @@ server <- function(input, output) {
        geom_vline(xintercept = 0,color = "grey", size=1, alpha = 0.5) +
        theme(strip.text.x = element_text(size=10, colour="black",margin = margin(0.1,0,0.1,0, "mm")),
              strip.background = element_rect(fill="white")) +
-       theme(legend.position="none")
+       theme(legend.position="none") 
      
      confidencePlot <- ggplot(DF.de(),aes(x=confidence)) + 
        geom_density() + 
        theme_linedraw() + 
        theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-       theme(axis.line.x = element_line(color="black", size = 0.5), axis.line.y = element_line(color="black", size = 0.5))
+       theme(axis.line.x = element_line(color="black", size = 0.5), axis.line.y = element_line(color="black", size = 0.5))+
+       xlim(0,1)+
        geom_vline(aes(xintercept=mean(confidence)),
                   color="grey", linetype="dashed", size=1)
      

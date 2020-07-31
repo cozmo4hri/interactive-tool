@@ -17,6 +17,13 @@ tab_intro <- tabItem(
   p("Participant (n = 264) rated 10 videos randomly choses from a subset of 348 animations out of the 790 animations"),
   img(src='cozmo.png'),
   tags$br(),
+  tags$b("Scatter plot:"),
+  p("Select the animation (group) and get the average valence and arousal ratings and confidence thereof and play the animation."),
+  tags$b("Density plot:"), 
+  p("How do people perceive the animation of the robot? Explore the effect of confidence and exposure to robots on the valence and arousal ratings, as well as the difference between animation groups."),
+  tags$b("Table:"), 
+  p("Get the detailed, averaged, information for the animations."),
+  tags$br(),
   tags$br(),
   p("Version: 0.5, last update 31 July 2020 by Ruud Hortensius",
     p("Thanks to Jack Taylor for help during the built and the first part of the code is based on", tags$a(href="http://shiny.psy.gla.ac.uk/lmem_sim/", "this code by Lisa DeBruine", target="_blank")))
