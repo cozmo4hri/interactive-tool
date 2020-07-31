@@ -1,24 +1,18 @@
 #
-# The Cozmo Emotion Validation Shiny App (version: 0.0.5)
+# The Interactive Cozmo Classification / Emotion Validation Shiny App
 # by Ruud Hortensius (University of Glasgow), part of the Cozmo4HRI project (github.com/comzmo4hri)
 #
 # This Shiny app displays the data from a emotion validation / classification study 
 # The user will be able to select the valence, arousal, and confidence of the ratings, the previous engagement of the raters with robots, and
 # the animation category of the Cozmo robot   
-# 
+#   
 # Send me a message (ruud.hortensius@glasgow.ac.uk), find me on twitter (@ruudhortensius) or github (github.com/comzmo4hri).
 #    
 # This is one of my first attempts to build a Shiny app: http://shiny.rstudio.com/. Just hit the 'Run App' button above.
 # 
-#  
 # The code is based and inspired by Lisa DeBruine's code for this shiny app: http://shiny.psy.gla.ac.uk/lmem_sim/
 #
-#
 # Ruud's wishlist:
-# - Information displayed in the app
-# - Density plots normal (lines are weird)
-# - Reduce loading time
-# - Make it interactive: a click on a datapoint results in the video loaded
 # - Display the animation categories in two columns
 
 # load the dependencies
@@ -26,6 +20,7 @@ library(shiny)
 library(shinydashboard) 
 library(tidyverse)
 library(DT)
+library(gridExtra)
 
 source("tab_intro.R")
 source("tab_scatter.R")
@@ -93,7 +88,7 @@ ui <- dashboardPage(
                            b <- unique(DF.main$group) 
         )
       )#,
-      # group input - participant/video ----
+      # group input - participant/video ---- #split for scatter/density so not needed anymore
       # box(
       #   title = "Data",
       #   solidHeader = TRUE, collapsible = TRUE, collapsed = FALSE,
@@ -148,29 +143,6 @@ server <- function(input, output) {
      DF.tmp2 <- DF.tmp2 %>% select(-interaction_score)
    })
   # 
-  # #plot for density ----
-  output$densPlot <- renderPlot({
-      ggplot(DF.de(), aes(x=valence,
-                 y=arousal,
-                 #by=animation_name,
-                 label = animation_name))+
-      geom_point() +
-      geom_density2d(color="darkblue") +
-      stat_density_2d(aes(fill = stat(nlevel), alpha =0.9), geom = "polygon") +
-      theme_linedraw() +
-      # coord_cartesian(xlim=c(-1,1), ylim=c(-1,1)) +
-      theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-      scale_fill_viridis_c() +
-      coord_fixed(1/1) +
-      xlim(-1,1) +
-      ylim(-1,1) +
-      geom_hline(yintercept=0,color = "grey", size=1, alpha = 0.5) +
-      geom_vline(xintercept = 0,color = "grey", size=1, alpha = 0.5) +
-      theme(strip.text.x = element_text(size=10, colour="black",margin = margin(0.1,0,0.1,0, "mm")),
-            strip.background = element_rect(fill="white")) +
-      theme(legend.position="none")
-  })
-  # 
   # #plot for scatter ----
    output$scatterPlot <- renderPlot({
      DF.sc() %>% 
@@ -190,41 +162,60 @@ server <- function(input, output) {
       geom_vline(xintercept = 0,color = "grey", size=1, alpha = 0.5)
   })
   # 
-  # #get video_id ----
-   #observeEvent(input$plot_click,
-  #              {
-   #               activeVideo <- DF.sc() %>% nearPoints(input$plot_click, maxpoints = 1) 
-    #              activeVideo <- activeVideo %>% mutate(video_id = as.character(video_id)) 
-     #             activeVideo <- activeVideo %>% pull(video_id)
-                  
-  #                write.csv(activeVideo, "active.csv")
-  #                myfile <- fs::file_temp(activeVideo, ext = ".mp4")
-                  
-      #          })
-  # 
-  # 
-  # #DF.de <- reactive({
-  # # activeVideo <- DF.sc %>%
-  # #    filter(video_id == "42") %>% 
-  # #    mutate(video_id = as.character(video_id)) %>% 
-  # #    pull(video_id)
-  # # })
-  # 
+   # #plot for density ----
+   output$densPlot <- renderPlot({
+     ggplot(DF.de(), aes(x=valence,
+                         y=arousal,
+                         #by=animation_name,
+                         label = animation_name))+
+       geom_point() +
+       geom_density2d(color="darkblue") +
+       stat_density_2d(aes(fill = stat(nlevel), alpha =0.9), geom = "polygon") +
+       theme_linedraw() +
+       # coord_cartesian(xlim=c(-1,1), ylim=c(-1,1)) +
+       theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+       scale_fill_viridis_c() +
+       coord_fixed(1/1) +
+       xlim(-1,1) +
+       ylim(-1,1) +
+       geom_hline(yintercept=0,color = "grey", size=1, alpha = 0.5) +
+       geom_vline(xintercept = 0,color = "grey", size=1, alpha = 0.5) +
+       theme(strip.text.x = element_text(size=10, colour="black",margin = margin(0.1,0,0.1,0, "mm")),
+             strip.background = element_rect(fill="white")) +
+       theme(legend.position="none")
+   })
+   # 
+   
   # #get info for video ----
    output$info <- renderPrint({
      DF.sc() %>% 
        nearPoints(input$plot_click, maxpoints = 1)
    }) 
    
-  # output$info2 <- renderPrint({
-  #   DF.sc() %>% 
-  #     nearPoints(input$plot_click, maxpoints = 1) %>% 
-  #     pull(video_id)
-  # }) 
-  # output$clickVideo <- renderPrint(({
-  #   activeVideo()
-  # }))
+   output$info2 <- renderPrint({
+     DF.sc() %>% 
+       nearPoints(input$plot_click, maxpoints = 1) %>% pull(video_id)
+   }) 
    
+  # #get video_id and renderUI ----
+  output$avideo <- renderUI({
+    videotemp <- DF.sc() %>% nearPoints(input$plot_click, maxpoints = 1) %>% pull(video_id)
+    
+    tags$video(id="video2", type = "video/mp4",src = paste0(videotemp, ".mp4", sep = ""), width = "320px", height = "180px", controls = "controls")
+    
+  }) 
+   
+  # I think reactively updating the whole html segment could be the trick to it though? 
+  # The tags$video() function could be within a renderUI({}) in the server, returning the html values that tag$video() produces. 
+  # You can then just say inside of that renderUI where to get the video’s path from. 
+  # You could then just feed that to an htmlOutput() in the UI?
+     
+  
+  
+  #filename <- normalizePath(file.path('./images',
+  #                                    paste('image', input$n, '.jpeg', sep='')))
+    #tags$video(id="video2", type = "video/mp4",src = paste0("42.mp4"), width = "320px", height = "180px", controls = "controls")
+
   # #table ----
    output$tableDF <- renderDataTable(datatable(
      DF.sc(), rownames= FALSE
