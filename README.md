@@ -5,6 +5,6 @@ The live version can be found on the University of Glasgow Institute of Neurosci
 
 For a local version:
 
-'''
+```
 shiny::runGitHub('interactive-tool', 'cozmo4hri')
-'''
+```
