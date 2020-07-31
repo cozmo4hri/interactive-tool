@@ -21,6 +21,8 @@ library(shinydashboard)
 library(tidyverse)
 library(DT)
 library(gridExtra)
+library(grid)
+library(gtable)
 
 source("tab_intro.R")
 source("tab_scatter.R")
@@ -164,7 +166,8 @@ server <- function(input, output) {
   # 
    # #plot for density ----
    output$densPlot <- renderPlot({
-     ggplot(DF.de(), aes(x=valence,
+     
+     densityPlot <- ggplot(DF.de(), aes(x=valence,
                          y=arousal,
                          #by=animation_name,
                          label = animation_name))+
@@ -183,6 +186,47 @@ server <- function(input, output) {
        theme(strip.text.x = element_text(size=10, colour="black",margin = margin(0.1,0,0.1,0, "mm")),
              strip.background = element_rect(fill="white")) +
        theme(legend.position="none")
+     
+     confidencePlot <- ggplot(DF.de(),aes(x=confidence)) + 
+       geom_density() + 
+       theme_linedraw() + 
+       theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+       theme(axis.line.x = element_line(color="black", size = 0.5), axis.line.y = element_line(color="black", size = 0.5))
+       geom_vline(aes(xintercept=mean(confidence)),
+                  color="grey", linetype="dashed", size=1)
+     
+     xPlot <- ggplot(DF.de(), aes(x=valence)) + 
+       geom_density() + 
+       theme_linedraw() + 
+       xlim(-1,1)+
+       theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+       geom_vline(aes(xintercept=mean(valence)),
+                  color="grey", linetype="dashed", size=1) +
+       theme(axis.title.x=element_blank(),
+             axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+       theme(axis.title.y=element_blank(),
+             axis.text.y=element_blank(),
+             axis.ticks.y=element_blank())
+     
+     yPlot <- ggplot(DF.de(), aes(x=arousal)) + 
+       geom_density() + 
+       theme_linedraw() + 
+       xlim(-1,1)+
+       theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+       geom_vline(aes(xintercept=mean(arousal)),
+                  color="grey", linetype="dashed", size=1) + 
+       coord_flip() +
+       theme(axis.title.x=element_blank(),
+             axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+       theme(axis.title.y=element_blank(),
+             axis.text.y=element_blank(),
+             axis.ticks.y=element_blank())
+     
+     grid.arrange(xPlot, confidencePlot, densityPlot, yPlot, ncol=2, nrow = 2, widths = c(2, 1), heights = c(1, 2)) 
+     
+     
    })
    # 
    
